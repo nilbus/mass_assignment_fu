@@ -54,7 +54,7 @@ module AttributeFu
           allowed_attribute_names = []
           logger.warn "No nested_attr_accessible_for fieldset found with name '#{fieldset}' for #{self.class.name}"
         end
-        updated_attributes = remove_disallowed_attributes_from_mass_assignment(updated_attributes, allowed_attribute_names.stringify)
+        updated_attributes = remove_disallowed_attributes_from_mass_assignment(updated_attributes, allowed_attribute_names)
         self.send(:attributes=, updated_attributes, false) # Turn off protected attributes since we removed the disallowed attributes
       end
       
@@ -70,7 +70,7 @@ module ActiveRecord
       return assigned_attributes if assigned_attributes.nil? or assigned_attributes.empty?
 
       # Start with what was specified in nested_attr_accessible_for
-      safe_attributes = explicitly_allowed_attributes.to_a.flatten
+      safe_attributes = [explicitly_allowed_attributes].flatten
       # Add anything marked attr_accessible in the model
       safe_attributes += self.class.accessible_attributes unless self.class.accessible_attributes.nil?
       safe_attributes = safe_attributes.hashify.stringify
@@ -107,7 +107,7 @@ module ActiveRecord
       def updatable_attributes(assigned_attributes, safe_attributes, explicitly_allowed_attributes, nest_level)
         kept_attributes = {}
 
-        assigned_attributes.each do |key, value|
+        assigned_attributes.stringify.each do |key, value|
           associated_class = nil
           if key =~ /\w+_attributes/
             association_name = key.gsub("_attributes","").to_sym
