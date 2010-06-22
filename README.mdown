@@ -1,0 +1,113 @@
+attribute_fu
+============
+
+attribute_fu is a Rails ActiveRecord plugin that allows you to protect attributes from mass assignment like [attr_accessible][1],
+but with multiple sets of rules and the ability to set rules for nested models.
+This allows for role or application state based protection for your models.
+
+You can use attribute_fu in conjunction with Rails' [attr_accessible][1] and [attr_protected][2].
+Attributes that are `attr_accessible` are considered globally writable, and attribute_fu will not filter assignments to them.
+Using `attr_protected` has no effect when using attribute_fu to update models since everything is protected by default,
+unless you specify that it should be accessible, in which case it overrides `attr_protected`.
+Keep in mind that `nested_attr_accessible_for` rules are only enforced when using `create_for` and `update_attributes_for`,
+and not when using `create`, `update`, `update_attributes`, or any other rails builtin methods.
+`attr_protected` is still useful for protecting the model against mass assignment from Rails' `update_attributes`.
+
+[1]: http://api.rubyonrails.org/classes/ActiveRecord/Base.html#M001796 (attr_accessible)
+[2]: http://api.rubyonrails.org/classes/ActiveRecord/Base.html#M001795 (attr_accessible)
+
+Quick Start
+-----------
+
+Models:
+
+    class Student < ActiveRecord::Base
+      has_many :grades
+      has_one :profile
+
+      # Can update full_name, preferred_name, and only the override_letter_grade attribute of the grades
+      nested_attr_accessible_for :administrator, [:full_name, :preferred_name, { :grades_attributes => [:override_letter_grade] }]
+
+      # Can update any profile attribute or delete the profile.
+      nested_attr_accessible_for :student, [:preferred_name, { :profile_attributes => :all }]
+
+      # Delegates to Grade's nested_attr_accessible_for :teacher
+      nested_attr_accessible_for :teacher, :grades_attributes
+    end
+
+    class Grade < ActiveRecord::Base
+      belongs_to :student
+
+      nested_attr_accessible_for :teacher, [:class_id, :honors, :number_grade, :letter_grade]
+    end
+
+    ...
+
+Controller:
+
+    class StudentsController << ActionController::Base
+      ...
+      def update
+        @student = Student.find params[:id]
+        @student.update_for current_user.role, params[:student]
+      end
+      ...
+    end
+
+View:
+
+    Silly mass update form example
+    <% form_for @student do |f| %>
+      Full Name: <%= f.text_field :full_name %>
+      Preferred Name: <%= f.text_field :preferred_name %>
+
+      <% fields_for @student.grades do |gf| %>
+        ...
+      <% end %>
+
+      <% fields_for @student.profile do |pf| %>
+        ...
+      <% end %>
+    <% end %>
+
+The params for this form might look something like:
+    { 'student' => { 'full_name' => 'Joey Baker',
+                     'preferred_name' => 'Joey',
+                     'grades_attributes' => { '1' => { 'class_id' => '5035',
+                                                       'letter_grade' => 'A' } },
+                     'profile_attributes' => { 'favorite_sport' => 'quiddich' }
+                   }
+    }
+
+Usage
+-----
+
+In your models:
+
+nested_attr_accessible_for(*fieldset_name*, *field_list*)
+
+*   *fieldset_name*: a name for the set of updatable fields
+*   *field_list*: an array of attributes and associations that can be updated.
+    Associations can take the form:
+    *   :foo - Delegate which fields can be updated on the foo association to the associated Foo model.
+        Everything is restricted that is not explicitly allowed with attr_accessible or nested_attr_accessible_for.
+        In the case of nested_attr_accessible_for, it checks for a fieldset with the same name.
+    *   {:foo => :all} - Make all attributes on Foo updatable, include "_delete".
+    *   {:foo => [:attr1, :attr2]} - Make the given list of attributes on Foo updatable.
+    *   {:foo => [:attr1, :attr2, {:bar => :all}]} - Foo's associations can also be updated.
+
+In your controllers, update the model using the filters specified in your model with `nested_attr_accessible_for`.
+
+update_for(*fieldset_name*, *attributes_hash*)  
+update_for!(*fieldset_name*, *attributes_hash*)  
+create_for(*fieldset_name*, *attributes_hash*)  
+create_for!(*fieldset_name*, *attributes_hash*)  
+
+You can also pass in an array of allowed fields instead of a rule name:
+
+update_for(*field_list*, *attributes_hash*)  
+...
+
+-----------
+
+Copyright (c) 2010 SciMed Solutions, released under the MIT license
