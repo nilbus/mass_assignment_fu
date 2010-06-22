@@ -15,9 +15,6 @@ module AttributeFu
       self.naa_fieldsets[fieldset.to_sym] = fields
     end
 
-    # ActiveRecord::Update that allows mass-assignment of protected attributes that are specified
-    # attribute_hash - A hash of attributes and values to update. e.g. { :name => "Fred", :age => 62, :admin => true }
-    # editable_protected_attributes - An array of protected attributes that are allowed to be updated. e.g. [:admin, :active]
     def create_for(fieldset, attribute_hash)
       object = self.new
       return object.update_with_protected(fieldset, attribute_hash)
@@ -44,15 +41,12 @@ module AttributeFu
   end
 
   module InstanceMethods
-    # ActiveRecord::Update that allows mass-assignment of protected attributes that are specified
-    # attribute_hash - A hash of attributes and values to update. e.g. { :name => "Fred", :age => 62, :admin => true }
-    # editable_protected_attributes - An array of protected attributes that are allowed to be updated. e.g. [:admin, :active]
-    def update_for(fieldset, attribute_hash)
+    def update_attributes_for(fieldset, attribute_hash)
       _update_with_protected(fieldset, attribute_hash)
       return self.save
     end
     
-    def update_for!(fieldset, attribute_hash)
+    def update_attributes_for!(fieldset, attribute_hash)
       _update_with_protected(fieldset, attribute_hash)
       return self.save!
     end
