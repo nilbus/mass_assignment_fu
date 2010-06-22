@@ -79,7 +79,7 @@ module ActiveRecord
   class Base
     def remove_disallowed_attributes_from_mass_assignment(attributes, allowed_attributes, nest_level = 0)
       return attributes if attributes.nil? or attributes.empty?
-      allowed_attributes = allowed_attributes.to_a
+      allowed_attributes = allowed_attributes.to_a.flatten
       
       safe_attribute_names = Array.new # array version of the allowed attributes
       safe_attribute_hash = Hash.new # hash version of safe_attribute_names
