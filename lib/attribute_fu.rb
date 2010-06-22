@@ -5,11 +5,12 @@
 module AttributeFu
   def self.included(base)
     base.send :extend, ClassMethods
+    base.send :include, ActiveRecordInstanceMethods
   end
 
   module ClassMethods
     def nested_attr_accessible_for(fieldset, fields)
-      send :include, InstanceMethods
+      send :include, NAAFInstanceMethods
       cattr_accessor :naa_fieldsets
       self.naa_fieldsets ||= {}
       self.naa_fieldsets[fieldset.to_sym] = fields
@@ -25,9 +26,21 @@ module AttributeFu
       return object.update_with_protected!(fieldset, attribute_hash)
     end
     
+    def find_associated_class(association)
+      begin
+        return reflect_on_association(association).klass
+      rescue
+        return nil
+      end
+    end
+    
+    def new_associated_class(association)
+      return find_associated_class.new
+    end
+  
   end
 
-  module InstanceMethods
+  module NAAFInstanceMethods
     def update_attributes_for(fieldset, attribute_hash)
       _update_with_protected(fieldset, attribute_hash)
       return self.save
@@ -37,7 +50,6 @@ module AttributeFu
       _update_with_protected(fieldset, attribute_hash)
       return self.save!
     end
-
 
     
     protected
@@ -57,14 +69,9 @@ module AttributeFu
         updated_attributes = remove_disallowed_attributes_from_mass_assignment(updated_attributes, allowed_attribute_names)
         self.send(:attributes=, updated_attributes, false) # Turn off protected attributes since we removed the disallowed attributes
       end
-      
   end
-end
 
-ActiveRecord::Base.send :include, AttributeFu
-
-module ActiveRecord
-  class Base
+  module ActiveRecordInstanceMethods
 
     def remove_disallowed_attributes_from_mass_assignment(assigned_attributes, explicitly_allowed_attributes, nest_level = 0)
       return assigned_attributes if assigned_attributes.nil? or assigned_attributes.empty?
@@ -82,18 +89,6 @@ module ActiveRecord
       return kept_attributes
     end
     
-    def self.find_associated_class(association)
-      begin
-        return reflect_on_association(association).klass
-      rescue
-        return nil
-      end
-    end
-    
-    def self.new_associated_class(association)
-      return find_associated_class.new
-    end
-  
     def find_associated_class(association)
       return self.class.find_associated_class(association)
     end
@@ -192,3 +187,6 @@ class Hash
     return new_hash
   end
 end
+
+ActiveRecord::Base.send :include, AttributeFu
+
