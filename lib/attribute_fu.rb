@@ -25,19 +25,6 @@ module AttributeFu
       return object.update_with_protected!(fieldset, attribute_hash)
     end
     
-    
-    def associated_class(association)
-      begin
-        return reflect_on_association(association).klass
-      rescue
-        return nil
-      end
-    end
-    
-    def new_associated_class(association)
-      return associated_class.new
-    end
-  
   end
 
   module InstanceMethods
@@ -95,8 +82,20 @@ module ActiveRecord
       return kept_attributes
     end
     
-    def associated_class(association)
-      return self.class.associated_class(association)
+    def self.find_associated_class(association)
+      begin
+        return reflect_on_association(association).klass
+      rescue
+        return nil
+      end
+    end
+    
+    def self.new_associated_class(association)
+      return find_associated_class.new
+    end
+  
+    def find_associated_class(association)
+      return self.class.find_associated_class(association)
     end
     
     def new_associated_class(association)
@@ -112,7 +111,7 @@ module ActiveRecord
           associated_class = nil
           if key =~ /\w+_attributes/
             association_name = key.gsub("_attributes","").to_sym
-            associated_class = associated_class(association_name)
+            associated_class = find_associated_class(association_name)
           end
           
           # See if this attribute could be assignable
