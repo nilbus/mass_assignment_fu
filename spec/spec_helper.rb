@@ -4,7 +4,7 @@ rescue LoadError
   puts "You need to install rspec in your base app"
   exit
 end
-require File.dirname(__FILE__) + '/../../../../vendor/plugins/attribute_fu/lib/attribute_fu'
+require File.dirname(__FILE__) + '/../../../../vendor/plugins/mass_assignment_fu/lib/mass_assignment_fu'
 
 plugin_spec_dir = File.dirname(__FILE__)
 ActiveRecord::Base.logger = Logger.new(plugin_spec_dir + "/debug.log")
@@ -41,7 +41,7 @@ class MockModel
 end
 
 class Student < MockModel
-  include AttributeFu
+  include MassAssignmentFu
 
   attr_accessible_for :administrator, [:full_name, { :grades_attributes => [:override_letter_grade] }]
   attr_accessible_for :student, [:preferred_name, { :profile_attributes => :all }]
@@ -59,7 +59,7 @@ class Student < MockModel
 end
 
 class Grade < MockModel
-  include AttributeFu
+  include MassAssignmentFu
 
   def initial_attributes
     { 'letter_grade' => 'C', 'class_id' => '3857', 'override_letter_grade' => nil }
@@ -75,7 +75,7 @@ class Grade < MockModel
 end
 
 class Profile < MockModel
-  include AttributeFu
+  include MassAssignmentFu
 
   def initial_attributes
     { 'favorite_sport' => 'quiddich' }

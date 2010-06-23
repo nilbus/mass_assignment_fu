@@ -8,7 +8,7 @@ describe MockModel do
   end
 end
 
-describe "AttributeFu" do
+describe "MassAssignmentFu" do
   before :each do
     @student = Student.new
   end

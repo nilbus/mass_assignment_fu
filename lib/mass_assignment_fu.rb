@@ -1,8 +1,8 @@
-# AttributeFu
+# MassAssignmentFu
 
 # this lib file contains some methods that might be useful for active records
 
-module AttributeFu
+module MassAssignmentFu
   def self.included(base)
     base.send :extend, ClassMethods
     base.send :include, ActiveRecordInstanceMethods
@@ -188,5 +188,5 @@ class Hash
   end
 end
 
-ActiveRecord::Base.send :include, AttributeFu
+ActiveRecord::Base.send :include, MassAssignmentFu
 

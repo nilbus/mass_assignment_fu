@@ -1,4 +1,4 @@
 # desc "Explaining what the task does"
-# task :attribute_fu do
+# task :mass_assignment_fu do
 #   # Task goes here
 # end
