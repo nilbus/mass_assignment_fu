@@ -111,9 +111,7 @@ module MassAssignmentFu
           
           # See if this attribute could be assignable
           if ((safe_attributes.keys.include?(key.gsub(/\(.+/, "")) or key =~ /\d+/) and !attributes_protected_by_default.include?(key.gsub(/\(.+/, ""))) or (nest_level > 0 and key == "id")
-            unless value.is_a?(Hash)
-              kept_attributes.store(key, value)
-            else # it is a hash
+            if value.is_a?(Hash)
               if safe_attributes[key] == "all" and associated_class
                 # {:association => 'all'} includes all of association's properties but not its associations. It translates to
                 # {:association => ['attr1', 'attr2', 'attrN', '_delete']}
@@ -139,6 +137,20 @@ module MassAssignmentFu
                   kept_attributes.store(key, remove_disallowed_attributes_from_mass_assignment(value, safe_attributes[key], nest_level+1))
                 end
               end
+            elsif value.is_a?(Array)
+              # forms can pass in arrays like { :colors_attributes => [ { :name => 'red', :hex => '#F00' }, { :name => 'green', :hex => '#0F0' } ]
+              #                            or { :colors => [ 'red', 'green' ]
+              safe_child_attributes = value.collect do |val|
+                if associated_class
+                  unless val.is_a? Hash then raise "When passing an array for nested attribute assignment, the array must contain only hashes: #{value}" end
+                  remove_disallowed_attributes_from_mass_assignment(val, safe_attributes[key], nest_level+1)
+                else
+                  val
+                end
+              end
+              kept_attributes.store(key, safe_child_attributes)
+            else # Just a regular value
+              kept_attributes.store(key, value)
             end
           else
             Rails.logger.debug "not updating #{key}; not in allowed set of attributes: #{safe_attributes.keys}"

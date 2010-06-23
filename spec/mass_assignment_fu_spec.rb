@@ -42,8 +42,8 @@ describe "MassAssignmentFu" do
     array_attrs = @student.initial_attributes.merge('grades_attributes' => [Grade.new.initial_attributes])
     @student.attributes = array_attrs
 
-    @student.update_attributes_for(:administrator, {'grades_attributes' => [Grade.new.initial_attributes.merge('override_letter_grade' => 'F', 'letter_grade' => 'F')] })
-    @student.attributes.should == array_attrs.merge({'grades_attributes' => [Grade.new.initial_attributes.merge('override_letter_grade' => 'F')] })
+    @student.update_attributes_for(:administrator, {'grades_attributes' => [Grade.new.initial_attributes.merge('override_letter_grade' => 'F', 'letter_grade' => 'F')]})
+    @student.attributes.should == array_attrs.merge({'grades_attributes' => [{ 'override_letter_grade' => 'F' }]})
   end
 
 end
