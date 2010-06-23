@@ -9,7 +9,7 @@ module AttributeFu
   end
 
   module ClassMethods
-    def nested_attr_accessible_for(fieldset, fields)
+    def attr_accessible_for(fieldset, fields)
       send :include, NAAFInstanceMethods
       cattr_accessor :naa_fieldsets
       self.naa_fieldsets ||= {}
@@ -64,7 +64,7 @@ module AttributeFu
           allowed_attribute_names = fieldset
         else
           allowed_attribute_names = []
-          logger.warn "No nested_attr_accessible_for fieldset found with name '#{fieldset}' for #{self.class.name}"
+          logger.warn "No attr_accessible_for fieldset found with name '#{fieldset}' for #{self.class.name}"
         end
         updated_attributes = remove_disallowed_attributes_from_mass_assignment(updated_attributes, allowed_attribute_names)
         self.send(:attributes=, updated_attributes, false) # Turn off protected attributes since we removed the disallowed attributes
@@ -76,7 +76,7 @@ module AttributeFu
     def remove_disallowed_attributes_from_mass_assignment(assigned_attributes, explicitly_allowed_attributes, nest_level = 0)
       return assigned_attributes if assigned_attributes.nil? or assigned_attributes.empty?
 
-      # Start with what was specified in nested_attr_accessible_for
+      # Start with what was specified in attr_accessible_for
       safe_attributes = [explicitly_allowed_attributes].flatten
       # Add anything marked attr_accessible in the model
       safe_attributes += self.class.accessible_attributes unless self.class.accessible_attributes.nil?
@@ -120,8 +120,8 @@ module AttributeFu
                 kept_attributes.store(key, associated_class.new.remove_disallowed_attributes_from_mass_assignment(value, associated_class.new.attributes.keys << '_delete', nest_level+1))
               elsif safe_attributes[key] == "true" and associated_class
                 # When one of the allowed_attributes was an associated_class but no fields are specified,
-                # check the associated_class model's nested_attr_accessible_for, attr_accessible, and attr_protected.
-                # If child attributes are not explicitly allowed by the model or nested_attr_accessible_for, they are not allowed.
+                # check the associated_class model's attr_accessible_for, attr_accessible, and attr_protected.
+                # If child attributes are not explicitly allowed by the model or attr_accessible_for, they are not allowed.
                 associated_class_safe_attributes = []
                 associated_class_safe_attributes = associated_class.naa_fieldsets[@naa_fieldset] if @naa_fieldset && defined?(associated_class.naa_fieldsets) && associated_class.naa_fieldsets[@naa_fieldset]
                 kept_attributes.store(key, associated_class.new.remove_disallowed_attributes_from_mass_assignment(value, associated_class_safe_attributes, nest_level+1))

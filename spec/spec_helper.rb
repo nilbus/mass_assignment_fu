@@ -43,9 +43,9 @@ end
 class Student < MockModel
   include AttributeFu
 
-  nested_attr_accessible_for :administrator, [:full_name, { :grades_attributes => [:override_letter_grade] }]
-  nested_attr_accessible_for :student, [:preferred_name, { :profile_attributes => :all }]
-  nested_attr_accessible_for :teacher, :grades_attributes
+  attr_accessible_for :administrator, [:full_name, { :grades_attributes => [:override_letter_grade] }]
+  attr_accessible_for :student, [:preferred_name, { :profile_attributes => :all }]
+  attr_accessible_for :teacher, :grades_attributes
 
   def initial_attributes
     { 'full_name' => 'Jeff Fenworth', 'preferred_name' => 'Jef',

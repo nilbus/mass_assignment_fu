@@ -33,7 +33,7 @@ describe "AttributeFu" do
     @student.attributes.should == @student.initial_attributes.merge({'profile_attributes' => Profile.new.initial_attributes.merge('favorite_sport' => 'world cup') })
   end
 
-  it "should fall back to using attr_accessible for nested models where nested_attr_accessible_for is not specified" do
+  it "should fall back to using attr_accessible for nested models where attr_accessible_for is not specified" do
     @student.update_attributes_for(:teacher, { :grades_attributes => { '1' => Grade.new.initial_attributes.merge('class_id' => '15', 'letter_grade' => 'F', 'override_letter_grade' => 'F') } })
     @student.attributes.should == @student.initial_attributes.merge({'grades_attributes' => { '1' => Grade.new.initial_attributes.merge('class_id' => '15') } })
   end
