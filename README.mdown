@@ -1,5 +1,5 @@
 mass_assignment_fu
-============
+==================
 
 mass_assignment_fu is a Rails ActiveRecord plugin that allows you to protect attributes from mass assignment like [attr_accessible][1],
 but with multiple sets of rules and the ability to set rules for nested models.
@@ -107,7 +107,5 @@ You can also pass in an array of allowed fields instead of a rule name:
 
 update_for(*field_list*, *attributes_hash*)  
 ...
-
------------
 
 Copyright (c) 2010 SciMed Solutions, released under the MIT license
