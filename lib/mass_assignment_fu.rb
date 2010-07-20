@@ -10,10 +10,10 @@ module MassAssignmentFu
 
   module ClassMethods
     def attr_accessible_for(fieldset, fields)
-      send :include, NAAFInstanceMethods
-      cattr_accessor :naa_fieldsets
-      self.naa_fieldsets ||= {}
-      self.naa_fieldsets[fieldset.to_sym] = fields
+      send :include, MassAssignmentFuInstanceMethods
+      cattr_accessor :accessible_fieldsets
+      self.accessible_fieldsets ||= {}
+      self.accessible_fieldsets[fieldset.to_sym] = fields
     end
 
     def create_for(fieldset, attribute_hash)
@@ -40,7 +40,7 @@ module MassAssignmentFu
   
   end
 
-  module NAAFInstanceMethods
+  module MassAssignmentFuInstanceMethods
     def update_attributes_for(fieldset, attribute_hash)
       _update_with_protected(fieldset, attribute_hash)
       return self.save
@@ -55,11 +55,11 @@ module MassAssignmentFu
     protected
 
       def _update_with_protected(fieldset, updated_attributes)
-        @naa_fieldset = nil
+        @accessible_fieldset = nil
         # Look up a named fieldset, if it exists. Otherwise assume an array of attributes was passed in
-        if self.class.naa_fieldsets[fieldset.to_sym]
-          allowed_attribute_names = self.class.naa_fieldsets[fieldset.to_sym]
-          @naa_fieldset = fieldset
+        if self.class.accessible_fieldsets[fieldset.to_sym]
+          allowed_attribute_names = self.class.accessible_fieldsets[fieldset.to_sym]
+          @accessible_fieldset = fieldset
         elsif fieldset.is_a? Array
           allowed_attribute_names = fieldset
         else
@@ -121,7 +121,7 @@ module MassAssignmentFu
                 # check the associated_class model's attr_accessible_for, attr_accessible, and attr_protected.
                 # If child attributes are not explicitly allowed by the model or attr_accessible_for, they are not allowed.
                 associated_class_safe_attributes = []
-                associated_class_safe_attributes = associated_class.naa_fieldsets[@naa_fieldset] if @naa_fieldset && defined?(associated_class.naa_fieldsets) && associated_class.naa_fieldsets[@naa_fieldset]
+                associated_class_safe_attributes = associated_class.accessible_fieldsets[@accessible_fieldset] if @accessible_fieldset && defined?(associated_class.accessible_fieldsets) && associated_class.accessible_fieldsets[@accessible_fieldset]
                 kept_attributes.store(key, associated_class.new.remove_disallowed_attributes_from_mass_assignment(value, associated_class_safe_attributes, nest_level+1))
               elsif key == "id"
                 # Keep the ids of associated models - you don't need to specify 'id' as allowed
