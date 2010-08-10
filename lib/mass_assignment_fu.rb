@@ -153,7 +153,7 @@ module MassAssignmentFu
               kept_attributes.store(key, value)
             end
           else
-            Rails.logger.debug "not updating #{key}; not in allowed set of attributes: #{safe_attributes.keys}"
+            Rails.logger.debug "not updating #{key}; not in allowed set of attributes: #{safe_attributes.keys.inspect}"
           end
         end
         return kept_attributes
