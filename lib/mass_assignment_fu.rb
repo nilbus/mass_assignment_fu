@@ -82,7 +82,7 @@ module MassAssignmentFu
       safe_attributes += self.class.accessible_attributes unless self.class.accessible_attributes.nil?
       safe_attributes = safe_attributes.hashify.stringify
 
-      kept_attributes = updatable_attributes(assigned_attributes, safe_attributes, explicitly_allowed_attributes, nest_level)
+      kept_attributes = attributes_that_can_be_updated(assigned_attributes, safe_attributes, explicitly_allowed_attributes, nest_level)
       filtered_attributes = assigned_attributes.keys - kept_attributes.keys
       log_protected_attribute_removal(filtered_attributes) if filtered_attributes.any?
 
@@ -99,7 +99,8 @@ module MassAssignmentFu
 
     private
       # Scan through each of the assigned_attributes, and add the allowed ones to the safe list
-      def updatable_attributes(assigned_attributes, safe_attributes, explicitly_allowed_attributes, nest_level)
+      # (updatable_attributes is taken by ThinkingSphinx)
+      def attributes_that_can_be_updated(assigned_attributes, safe_attributes, explicitly_allowed_attributes, nest_level)
         kept_attributes = {}
 
         assigned_attributes.stringify.each do |key, value|
